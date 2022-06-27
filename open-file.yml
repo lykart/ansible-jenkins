@@ -1,0 +1,24 @@
+---
+- hosts: localhost
+  become: no
+  tasks:
+    - name: Get artifact
+      get_url:
+        url: http://localhost:8080/job/Build-job/lastSuccessfulBuild/artifact/artifact.zip
+        force_basic_auth: yes
+        username: "{{JENKINS_USER}}"
+        password: "{{JENKINS_PASSWORD}}"
+        dest: /srv/artifact.zip
+
+    - name: Unzip archive
+      unarchive:
+        src: /srv/artifact.zip
+        dest: /srv/
+    
+    - name: Display testfile contents
+      command: cat testfile chdir=/srv
+      register: command_output
+
+    - name: Print to stdout
+      debug:
+        msg: "{{command_output.stdout}}"
